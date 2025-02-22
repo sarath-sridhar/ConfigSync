@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 
@@ -7,11 +8,13 @@ namespace ConfigSync
     public class ConfigSynchronizer
     {
         private readonly IConfiguration _sourceConfig;
-        private IConfiguration _targetConfig;
+        public IConfiguration _targetConfig;
+        private ILogger _logger;
 
-        public ConfigSynchronizer(IConfiguration sourceConfig)
+        public ConfigSynchronizer(IConfiguration sourceConfig, ILogger logger=null)
         {
-            _sourceConfig = sourceConfig; // The "main" settings to sync from
+            _sourceConfig = sourceConfig; 
+            _logger = logger;
         }
 
         public ConfigSynchronizer FromJson(string jsonPath)
@@ -32,7 +35,17 @@ namespace ConfigSync
 
         public void Sync()
         {
-            //ToDo: sync logic
+            var diffs = GetDifferences();
+            if (_targetConfig is IConfigurationRoot targetRoot)
+            {
+                foreach (var diff in diffs)
+                {
+                    string key = diff.Key;
+                    string value = _sourceConfig[key];
+                    _logger?.LogInformation($"Syncing {key}: {diff.Value}");
+                    
+                }
+            }
         }
 
         public Dictionary<string, string> GetDifferences()
@@ -40,8 +53,13 @@ namespace ConfigSync
             var diffs = new Dictionary<string, string>();
             foreach (var pair in _sourceConfig.AsEnumerable())
             {
+                if (pair.Value == null) continue; 
                 string targetValue = _targetConfig[pair.Key];
-                if (targetValue != pair.Value && pair.Value != null)
+                if (targetValue == null)
+                {
+                    diffs[pair.Key] = $"Missing in target, added {pair.Value}";
+                }
+                else if (targetValue != pair.Value)
                 {
                     diffs[pair.Key] = $"From {targetValue} to {pair.Value}";
                 }

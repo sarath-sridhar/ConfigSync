@@ -20,7 +20,7 @@ A lightweight .NET Core library to synchronize configuration settings across mul
   - Fluent, easy-to-use interface.
 
 - **Built With**:
-  - .NET 8.0
+  - .NET Standard 2.0
   - Microsoft.Extensions.Configuration
   - Microsoft.Extensions.Logging
 
@@ -31,7 +31,7 @@ Since this is a demo project, you can clone it and reference it locally:
 1. Clone the repository:
    ```bash
    git clone https://github.com/YOUR_USERNAME/ConfigSync.git
-   ```
+  
 2. Open `ConfigSyncSolution.sln` in Visual Studio.
 3. Build the solution (`Ctrl+Shift+B`).
 
